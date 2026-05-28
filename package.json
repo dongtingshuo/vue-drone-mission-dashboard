@@ -1,0 +1,40 @@
+{
+  "name": "drone-control-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-assisted drone monitoring and mission control dashboard built with Vue 3 and Vite.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "npm run build"
+  },
+  "keywords": [
+    "vue",
+    "vite",
+    "drone",
+    "dashboard",
+    "monitoring",
+    "mission-planning"
+  ],
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.13.2",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.13.0",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.24",
+    "vue-echarts": "^8.0.1",
+    "vue-router": "^4.6.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.2.4"
+  }
+}

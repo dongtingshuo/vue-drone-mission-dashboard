@@ -1,5 +1,7 @@
 # 项目结构与架构说明
 
+中文 | [English](#project-structure-and-architecture)
+
 本文档用于快速了解项目的模块边界、页面职责和主要数据流。
 
 ## 根目录
@@ -81,3 +83,91 @@ MainLayout 模拟连接无人机
 - `vendor-xlsx`：Excel 导出依赖。
 
 该配置可降低单个产物体积，便于浏览器缓存和后续性能分析。
+
+---
+
+# Project Structure and Architecture
+
+[中文](#项目结构与架构说明) | English
+
+This document explains the module boundaries, page responsibilities, and main data flow of the project.
+
+## Root Directory
+
+```text
+drone-control-system/
+├── .github/workflows/ci.yml  # GitHub Actions build check
+├── public/                   # Static assets
+├── src/                      # Application source code
+├── index.html                # Vite HTML entry
+├── package.json              # Project metadata, scripts, and dependencies
+├── package-lock.json         # Dependency lock file
+├── README.md                 # Project overview
+├── STRUCTURE.md              # Project structure notes
+└── vite.config.js            # Vite configuration
+```
+
+## src Directory
+
+```text
+src/
+├── layout/
+│   └── MainLayout.vue        # Sidebar, top status bar, and route outlet
+├── router/
+│   └── index.js              # Page routes and lazy-loading configuration
+├── stores/
+│   └── drone.js              # Global drone, mission, and aerial monitoring state
+├── views/
+│   ├── MonitorView.vue       # Real-time monitoring
+│   ├── MissionView.vue       # AI mission control
+│   ├── VideoView.vue         # Aerial monitoring
+│   ├── RecordsView.vue       # Mission record list
+│   └── RecordDetailView.vue  # Mission detail
+├── App.vue
+├── main.js
+└── style.css
+```
+
+## Page Responsibilities
+
+| Page | Route | Responsibility |
+| --- | --- | --- |
+| MonitorView | `/monitor` | Displays flight status, trajectory, attitude, AI detection targets, and real-time charts. |
+| MissionView | `/mission` | Edits mission parameters and waypoints, runs path optimization, and saves or dispatches missions. |
+| VideoView | `/video` | Shows a simulated aerial feed and manages AI marks, screenshots, and recording records. |
+| RecordsView | `/records` | Browses, searches, filters, deletes, exports, and re-executes missions. |
+| RecordDetailView | `/records/:id` | Shows one mission's basic information, waypoint data, and AI analysis report. |
+
+## State Management
+
+`src/stores/drone.js` uses Pinia to manage the core business state:
+
+- `droneStatus`: real-time drone flight status.
+- `trajectoryHistory`: flight trajectory history.
+- `detectedTargets`: AI detection targets on the monitoring page.
+- `missionRecords`: mission record list.
+- `missionPlanForm` / `missionPlanNodes`: mission planning form and waypoints.
+- `videoAiMarks` / `videoScreenshots` / `videoRecordedSegments`: aerial monitoring state.
+
+## Data Flow
+
+```text
+MainLayout simulates a drone connection
+  -> Periodically updates the Pinia store
+  -> MonitorView / MissionView / VideoView / RecordsView read and display state
+  -> User actions write back to the store
+  -> Mission details, re-execution, and export reuse the same mission records
+```
+
+For real-world integration, the simulated update logic in `MainLayout.vue` should be extracted into a service layer such as `src/services/droneRealtime.js`, then connected to WebSocket, REST API, or device SDK data sources.
+
+## Build Optimization
+
+`vite.config.js` includes dependency-based chunk splitting:
+
+- `vendor-vue`: Vue, Pinia, and related runtime packages.
+- `vendor-element-plus`: Element Plus UI library.
+- `vendor-charts`: ECharts and vue-echarts.
+- `vendor-xlsx`: Excel export dependency.
+
+This setup reduces individual bundle size and improves browser caching and later performance analysis.

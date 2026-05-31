@@ -1,5 +1,7 @@
 # AI辅助无人机实时监控与任务控制系统
 
+中文 | [English](#ai-assisted-drone-real-time-monitoring-and-mission-control-system)
+
 一个基于 Vue 3 + Vite 的无人机任务控制前端项目，面向巡检、安防、农田监测等场景，提供实时飞行状态、航点规划、航拍识别和任务记录管理等工作台能力。
 
 > 当前版本使用前端模拟数据演示完整交互流程，可作为无人机地面站、低空巡检平台或可视化大屏的前端原型继续扩展。
@@ -83,7 +85,9 @@ drone-control-system/
 
 ## 数据说明
 
-项目目前未连接真实无人机、后端服务或 AI 推理服务。实时飞行数据、航拍识别结果和任务记录均在前端模拟生成，便于展示页面交互和业务流程。后续接入真实服务时，可将 Pinia store 中的模拟更新逻辑替换为 WebSocket、REST API 或设备 SDK 数据源。
+项目目前未连接真实无人机、后端服务或 AI 推理服务。实时飞行数据、航拍识别结果和任务记录均在前端模拟生成，便于展示页面交互和业务流程。
+
+后续接入真实服务时，可将 Pinia store 中的模拟更新逻辑替换为 WebSocket、REST API 或设备 SDK 数据源。
 
 ## 部署建议
 
@@ -94,3 +98,106 @@ npm run build
 ```
 
 生成的 `dist/` 目录可部署到 GitHub Pages、Vercel、Netlify 或任意静态站点服务。
+
+---
+
+# AI-Assisted Drone Real-Time Monitoring and Mission Control System
+
+[中文](#ai辅助无人机实时监控与任务控制系统) | English
+
+A Vue 3 + Vite frontend project for drone mission control scenarios such as inspection, security patrol, and agricultural monitoring. It provides a dashboard-style workspace for real-time flight status, waypoint planning, aerial recognition, and mission record management.
+
+> The current version uses simulated frontend data to demonstrate the full interaction flow. It can be extended into a drone ground station, low-altitude inspection platform, or visualization dashboard prototype.
+
+## Highlights
+
+- Dark control-console interface designed for real-time monitoring and data-dense workflows.
+- Simulated drone connection with live battery, speed, altitude, attitude, trajectory, and signal data.
+- Waypoint CRUD, mission parameter configuration, path optimization, and mission save/dispatch flows.
+- Simulated aerial video, AI recognition marks, manual selection, screenshots, and recording records.
+- Mission search, filtering, detail view, re-execution, deletion, and Excel export.
+- Route lazy loading and Vite chunk splitting for a cleaner production build.
+
+## Tech Stack
+
+| Category | Technology |
+| --- | --- |
+| Frontend Framework | Vue 3 |
+| Build Tool | Vite |
+| State Management | Pinia |
+| Router | Vue Router |
+| UI Library | Element Plus |
+| Charts | ECharts / vue-echarts |
+| Data Export | xlsx |
+
+## Features
+
+| Module | Description |
+| --- | --- |
+| Real-Time Monitoring | Displays drone online status, flight metrics, attitude panel, trajectory map, and AI detection targets. |
+| AI Mission Control | Edits mission parameters and waypoints, optimizes routes, and saves or dispatches missions. |
+| Aerial Monitoring | Simulates an aerial video feed with target recognition marks, screenshots, recording, and automatic detection. |
+| Mission Records | Manages historical missions with filtering, export, detail view, deletion, and re-execution. |
+
+## Getting Started
+
+### Requirements
+
+- Node.js >= 20.19.0
+- npm >= 10.0.0
+
+### Installation
+
+```bash
+npm install
+npm run dev
+```
+
+After the development server starts, open the local URL shown in the terminal.
+
+### Scripts
+
+```bash
+npm run dev      # Start the development server
+npm run build    # Build for production
+npm run preview  # Preview the production build locally
+npm run check    # Run the build check
+```
+
+## Project Structure
+
+```text
+drone-control-system/
+├── .github/workflows/ci.yml  # GitHub Actions build check
+├── public/                   # Static assets
+├── src/
+│   ├── layout/               # Main layout
+│   ├── router/               # Router configuration
+│   ├── stores/               # Pinia state management
+│   ├── views/                # Page views
+│   ├── App.vue
+│   ├── main.js
+│   └── style.css
+├── index.html
+├── package.json
+├── STRUCTURE.md
+└── vite.config.js
+```
+
+See [STRUCTURE.md](./STRUCTURE.md) for more architectural details.
+
+## Data Notes
+
+This project is not connected to real drones, backend services, or AI inference services yet. Real-time flight data, aerial recognition results, and mission records are generated in the frontend to demonstrate the user flow.
+
+When integrating real services later, the simulated update logic in the Pinia store can be replaced with WebSocket, REST API, or device SDK data sources.
+
+## Deployment
+
+Build static assets:
+
+```bash
+npm run build
+```
+
+The generated `dist/` directory can be deployed to GitHub Pages, Vercel, Netlify, or any static hosting service.

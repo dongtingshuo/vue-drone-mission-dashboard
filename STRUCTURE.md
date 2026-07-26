@@ -7,7 +7,7 @@
 ## 根目录
 
 ```text
-drone-control-system/
+vue-drone-mission-dashboard/
 ├── .github/workflows/ci.yml  # GitHub Actions 构建检查
 ├── public/                   # 静态资源
 ├── src/                      # 应用源码
@@ -25,6 +25,8 @@ drone-control-system/
 src/
 ├── layout/
 │   └── MainLayout.vue        # 左侧导航、顶部状态栏和路由出口
+├── charts/
+│   └── echarts.js             # 按需注册折线图、饼图和 Canvas 渲染器
 ├── router/
 │   └── index.js              # 页面路由和懒加载配置
 ├── stores/
@@ -80,7 +82,6 @@ MainLayout 模拟连接无人机
 - `vendor-vue`：Vue、Pinia 等核心运行时。
 - `vendor-element-plus`：Element Plus 组件库。
 - `vendor-charts`：ECharts 和 vue-echarts。
-- `vendor-xlsx`：Excel 导出依赖。
 
 该配置可降低单个产物体积，便于浏览器缓存和后续性能分析。
 
@@ -95,7 +96,7 @@ This document explains the module boundaries, page responsibilities, and main da
 ## Root Directory
 
 ```text
-drone-control-system/
+vue-drone-mission-dashboard/
 ├── .github/workflows/ci.yml  # GitHub Actions build check
 ├── public/                   # Static assets
 ├── src/                      # Application source code
@@ -113,6 +114,8 @@ drone-control-system/
 src/
 ├── layout/
 │   └── MainLayout.vue        # Sidebar, top status bar, and route outlet
+├── charts/
+│   └── echarts.js             # Tree-shaken line/pie chart and Canvas registration
 ├── router/
 │   └── index.js              # Page routes and lazy-loading configuration
 ├── stores/
@@ -168,6 +171,7 @@ For real-world integration, the simulated update logic in `MainLayout.vue` shoul
 - `vendor-vue`: Vue, Pinia, and related runtime packages.
 - `vendor-element-plus`: Element Plus UI library.
 - `vendor-charts`: ECharts and vue-echarts.
-- `vendor-xlsx`: Excel export dependency.
 
 This setup reduces individual bundle size and improves browser caching and later performance analysis.
+
+The router uses hash history and Vite emits relative asset paths so the static build works under repository subpaths without server-side rewrite rules. / 路由使用 Hash 模式，Vite 输出相对资源路径，因此静态构建可部署在仓库子路径下，无需服务端回退规则。

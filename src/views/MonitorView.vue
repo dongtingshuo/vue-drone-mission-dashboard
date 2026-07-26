@@ -253,7 +253,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useDroneStore } from '../stores/drone'
 import { storeToRefs } from 'pinia'
-import * as echarts from 'echarts'
+import echarts from '../charts/echarts'
 
 const droneStore = useDroneStore()
 const { droneStatus, trajectoryHistory, detectedTargets, batteryStatus } = storeToRefs(droneStore)
@@ -454,7 +454,6 @@ function updateCharts() {
   }
 }
 
-let updateTimer = null
 watch(() => droneStatus.value.flightTime, () => {
   updateCharts()
 })
@@ -498,6 +497,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 16px;
+  min-width: 0;
 }
 
 .status-icon {
@@ -859,7 +859,7 @@ onUnmounted(() => {
 
 @media (max-width: 576px) {
   .status-cards {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
   

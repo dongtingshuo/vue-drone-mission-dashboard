@@ -360,18 +360,8 @@ import { useDroneStore } from '../stores/drone'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-const draggable = {
-  props: ['modelValue', 'itemKey', 'handle'],
-  emits: ['update:modelValue', 'end'],
-  template: `
-    <div class="draggable-list">
-      <slot v-for="(item, index) in modelValue" :key="item[itemKey]" name="item" :element="item" :index="index" />
-    </div>
-  `
-}
-
 const droneStore = useDroneStore()
-const { droneStatus, currentMission, missionPlanForm, missionPlanNodes } = storeToRefs(droneStore)
+const { currentMission, missionPlanForm, missionPlanNodes } = storeToRefs(droneStore)
 
 const isReExecution = ref(false)
 const originalMissionName = ref('')
@@ -507,7 +497,7 @@ function addNode() {
 }
 
 function removeNode(index) {
-  const removed = pathNodes.value.splice(index, 1)
+  pathNodes.value.splice(index, 1)
   ElMessage.success(`已删除航点 ${index + 1}`)
 }
 
@@ -586,8 +576,8 @@ function onMapClick(event) {
   const latRange = mapBounds.maxLat - mapBounds.minLat
   const lngRange = mapBounds.maxLng - mapBounds.minLng
   
-  const normalizedX = (svgX - padding) / mapWidth
-  const normalizedY = 1 - (svgY - padding) / mapHeight
+  const normalizedX = Math.max(0, Math.min(1, (svgX - padding) / mapWidth))
+  const normalizedY = Math.max(0, Math.min(1, 1 - (svgY - padding) / mapHeight))
   
   const newLng = mapBounds.minLng + normalizedX * lngRange
   const newLat = mapBounds.minLat + normalizedY * latRange

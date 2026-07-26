@@ -1,0 +1,27 @@
+name: Bug report / 缺陷报告
+description: Report a reproducible dashboard or simulation problem.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not disclose credentials, real coordinates, private flight plans, or captured imagery.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 环境
+      description: Browser, OS, Node.js version, and revision.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction / 复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual behavior / 预期与实际行为
+    validations:
+      required: true

@@ -2,9 +2,17 @@
 
 中文 | [English](#ai-assisted-drone-real-time-monitoring-and-mission-control-system)
 
+[![CI](https://github.com/dongtingshuo/vue-drone-mission-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/dongtingshuo/vue-drone-mission-dashboard/actions/workflows/ci.yml)
+[![Vue 3](https://img.shields.io/badge/Vue-3-42b883.svg)](package.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-315b4a.svg)](LICENSE)
+
 一个基于 Vue 3 + Vite 的无人机任务控制前端项目，面向巡检、安防、农田监测等场景，提供实时飞行状态、航点规划、航拍识别和任务记录管理等工作台能力。
 
 > 当前版本使用前端模拟数据演示完整交互流程，可作为无人机地面站、低空巡检平台或可视化大屏的前端原型继续扩展。
+
+| 桌面端实时监控 | 移动端适配 |
+| --- | --- |
+| ![桌面端无人机任务看板真实截图](docs/dashboard-desktop.jpg) | ![移动端无人机任务看板真实截图](docs/dashboard-mobile.jpg) |
 
 ## 项目亮点
 
@@ -12,7 +20,7 @@
 - 连接无人机后自动生成模拟飞行数据，展示电量、速度、高度、姿态、轨迹和信号状态。
 - 支持航点增删改查、任务参数配置、路径优化和任务保存/发送。
 - 内置航拍画面模拟、AI识别标记、手动框选、截图和录制记录。
-- 任务记录支持搜索、筛选、详情查看、重新执行和 Excel 导出。
+- 任务记录支持搜索、日期/状态/类型筛选、分页、详情查看、重新执行和 CSV 导出。
 - 使用路由懒加载和 Vite 分包配置，降低首屏资源压力。
 
 ## 技术栈
@@ -25,7 +33,7 @@
 | 路由 | Vue Router |
 | UI 组件 | Element Plus |
 | 图表 | ECharts / vue-echarts |
-| 数据导出 | xlsx |
+| 数据导出 | 浏览器原生 CSV / JSON 下载 |
 
 ## 功能模块
 
@@ -34,7 +42,7 @@
 | 实时监控 | 展示无人机在线状态、飞行指标、姿态仪表、轨迹地图和 AI 检测目标。 |
 | AI任务控制 | 进行任务配置、航点编辑、路径优化、任务保存与发送。 |
 | 航拍监控 | 模拟实时航拍画面，支持目标识别标记、截图、录制和自动检测。 |
-| 任务记录 | 管理历史任务，支持筛选、导出、详情查看、删除和重新执行。 |
+| 任务记录 | 管理历史任务，支持筛选、分页、CSV/JSON 导出、详情查看、删除和重新执行。 |
 
 ## 快速开始
 
@@ -58,13 +66,15 @@ npm run dev
 npm run dev      # 启动开发服务器
 npm run build    # 构建生产版本
 npm run preview  # 本地预览生产构建
-npm run check    # 执行构建检查
+npm run lint     # 执行 Vue/JavaScript 静态检查
+npm run check    # 执行静态检查与生产构建
+npm run audit    # 检查生产依赖安全公告
 ```
 
 ## 项目结构
 
 ```text
-drone-control-system/
+vue-drone-mission-dashboard/
 ├── .github/workflows/ci.yml  # GitHub Actions 构建检查
 ├── public/                   # 静态资源
 ├── src/
@@ -89,6 +99,8 @@ drone-control-system/
 
 后续接入真实服务时，可将 Pinia store 中的模拟更新逻辑替换为 WebSocket、REST API 或设备 SDK 数据源。
 
+所有状态仅保存在当前页面内存中，刷新页面后会恢复初始模拟数据；“录制”只生成录制元数据，并不保存真实视频文件。航拍截图来自页面内的模拟场景。导出的 CSV 会防护常见电子表格公式注入，详情报告则以 JSON 导出并明确标记数据源为前端模拟。
+
 ## 部署建议
 
 构建静态资源：
@@ -97,7 +109,13 @@ drone-control-system/
 npm run build
 ```
 
-生成的 `dist/` 目录可部署到 GitHub Pages、Vercel、Netlify 或任意静态站点服务。
+生成的 `dist/` 目录使用相对资源路径和 Hash 路由，可部署到 GitHub Pages 项目子路径、Vercel、Netlify 或任意静态站点服务。
+
+## 安全与限制
+
+- 本项目不会向真实飞行器发送指令，不应作为真实地面站或安全关键系统使用。
+- 正式接入设备前必须增加身份认证、授权、命令确认、遥测完整性校验、失联保护、地理围栏、审计日志和服务端验证。
+- 详见 [SECURITY.md](./SECURITY.md)。
 
 ---
 
@@ -115,7 +133,7 @@ A Vue 3 + Vite frontend project for drone mission control scenarios such as insp
 - Simulated drone connection with live battery, speed, altitude, attitude, trajectory, and signal data.
 - Waypoint CRUD, mission parameter configuration, path optimization, and mission save/dispatch flows.
 - Simulated aerial video, AI recognition marks, manual selection, screenshots, and recording records.
-- Mission search, filtering, detail view, re-execution, deletion, and Excel export.
+- Mission search, date/status/type filtering, pagination, detail view, re-execution, deletion, and CSV export.
 - Route lazy loading and Vite chunk splitting for a cleaner production build.
 
 ## Tech Stack
@@ -128,7 +146,7 @@ A Vue 3 + Vite frontend project for drone mission control scenarios such as insp
 | Router | Vue Router |
 | UI Library | Element Plus |
 | Charts | ECharts / vue-echarts |
-| Data Export | xlsx |
+| Data Export | Native browser CSV / JSON downloads |
 
 ## Features
 
@@ -137,7 +155,7 @@ A Vue 3 + Vite frontend project for drone mission control scenarios such as insp
 | Real-Time Monitoring | Displays drone online status, flight metrics, attitude panel, trajectory map, and AI detection targets. |
 | AI Mission Control | Edits mission parameters and waypoints, optimizes routes, and saves or dispatches missions. |
 | Aerial Monitoring | Simulates an aerial video feed with target recognition marks, screenshots, recording, and automatic detection. |
-| Mission Records | Manages historical missions with filtering, export, detail view, deletion, and re-execution. |
+| Mission Records | Manages historical missions with filtering, pagination, CSV/JSON export, detail view, deletion, and re-execution. |
 
 ## Getting Started
 
@@ -161,13 +179,15 @@ After the development server starts, open the local URL shown in the terminal.
 npm run dev      # Start the development server
 npm run build    # Build for production
 npm run preview  # Preview the production build locally
-npm run check    # Run the build check
+npm run lint     # Lint Vue and JavaScript sources
+npm run check    # Lint and build for production
+npm run audit    # Check production dependency advisories
 ```
 
 ## Project Structure
 
 ```text
-drone-control-system/
+vue-drone-mission-dashboard/
 ├── .github/workflows/ci.yml  # GitHub Actions build check
 ├── public/                   # Static assets
 ├── src/
@@ -192,6 +212,8 @@ This project is not connected to real drones, backend services, or AI inference 
 
 When integrating real services later, the simulated update logic in the Pinia store can be replaced with WebSocket, REST API, or device SDK data sources.
 
+All state is held in page memory and resets to the initial simulation after a reload. “Recording” stores metadata only; it does not create a real video file. Aerial screenshots are rendered from the simulated scene. CSV exports mitigate common spreadsheet-formula injection, while detail reports are exported as JSON and identify the source as frontend simulation.
+
 ## Deployment
 
 Build static assets:
@@ -200,4 +222,10 @@ Build static assets:
 npm run build
 ```
 
-The generated `dist/` directory can be deployed to GitHub Pages, Vercel, Netlify, or any static hosting service.
+The generated `dist/` directory uses relative asset paths and hash routing, so it can be deployed under a GitHub Pages project path, Vercel, Netlify, or another static host.
+
+## Safety and limitations
+
+- This project does not send commands to a real aircraft and must not be used as a production ground station or safety-critical system.
+- A real integration requires authentication, authorization, command confirmation, telemetry integrity checks, link-loss protection, geofencing, audit logs, and server-side validation.
+- See [SECURITY.md](./SECURITY.md).

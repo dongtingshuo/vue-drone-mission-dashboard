@@ -23,6 +23,8 @@ coverage
 .idea
 .DS_Store
 Thumbs.db
+docs/*-2x.jpg
+docs/dashboard-desktop.png
 *.suo
 *.ntvs*
 *.njsproj

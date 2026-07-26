@@ -32,9 +32,9 @@
           style="width: 260px"
         />
         <div class="flex-spacer"></div>
-        <el-button type="primary" @click="exportToExcel" :loading="exporting">
+        <el-button type="primary" @click="exportToCsv" :loading="exporting">
           <el-icon><Download /></el-icon>
-          导出Excel
+          导出CSV
         </el-button>
       </div>
     </div>
@@ -93,7 +93,7 @@
       </div>
       
       <el-table
-        :data="filteredRecords"
+        :data="paginatedRecords"
         v-loading="loading"
         @row-click="viewDetail"
         row-class-name="clickable-row"
@@ -169,7 +169,7 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
-          :total="totalRecords"
+        :total="filteredRecords.length"
           layout="total, sizes, prev, pager, next, jumper"
         />
       </div>
@@ -178,12 +178,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDroneStore } from '../stores/drone'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import * as XLSX from 'xlsx'
 
 const router = useRouter()
 const droneStore = useDroneStore()
@@ -213,8 +212,24 @@ const filteredRecords = computed(() => {
   if (filterType.value) {
     result = result.filter(r => r.type === filterType.value)
   }
+
+  if (dateRange.value?.length === 2) {
+    const start = new Date(dateRange.value[0])
+    const end = new Date(dateRange.value[1])
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+    result = result.filter(r => {
+      const createdAt = new Date(String(r.createdAt).replace(/-/g, '/'))
+      return !Number.isNaN(createdAt.getTime()) && createdAt >= start && createdAt <= end
+    })
+  }
   
   return result
+})
+
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredRecords.value.slice(start, start + pageSize.value)
 })
 
 const totalRecords = computed(() => missionRecords.value.length)
@@ -334,36 +349,44 @@ function refreshData() {
   }, 1000)
 }
 
-function exportToExcel() {
+function escapeCsvCell(value) {
+  const raw = String(value ?? '')
+  const safe = /^[=+\-@]/.test(raw) ? `'${raw}` : raw
+  return `"${safe.replace(/"/g, '""')}"`
+}
+
+function exportToCsv() {
   exporting.value = true
   
   try {
-    const data = filteredRecords.value.map(r => ({
-      '任务ID': r.missionId || 'MSN-' + r.id.toString(36).toUpperCase(),
-      '任务名称': r.name,
-      '类型': getTypeName(r.type),
-      '状态': getStatusName(r.status),
-      '航点数': r.waypoints,
-      '距离(km)': (r.distance || 0).toFixed(2),
-      '时长': r.duration,
-      '创建时间': r.createdAt,
-      'AI检测对象': r.aiReport?.detectedObjects || '-',
-      '障碍物数量': r.aiReport?.obstacles || '-',
-      '路径偏差率(%)': r.aiReport?.pathDeviation || '-'
-    }))
-    
-    const ws = XLSX.utils.json_to_sheet(data)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, '任务记录')
-    
-
-    ws['!cols'] = [
-      { wch: 15 }, { wch: 20 }, { wch: 12 }, { wch: 10 },
-      { wch: 8 }, { wch: 12 }, { wch: 10 }, { wch: 20 },
-      { wch: 12 }, { wch: 12 }, { wch: 15 }
+    const headers = [
+      '任务ID', '任务名称', '类型', '状态', '航点数', '距离(km)',
+      '时长', '创建时间', 'AI检测对象', '障碍物数量', '路径偏差率(%)'
     ]
-    
-    XLSX.writeFile(wb, `任务记录_${new Date().toLocaleDateString()}.xlsx`)
+    const rows = filteredRecords.value.map(r => [
+      r.missionId || 'MSN-' + r.id.toString(36).toUpperCase(),
+      r.name,
+      getTypeName(r.type),
+      getStatusName(r.status),
+      r.waypoints,
+      (r.distance || 0).toFixed(2),
+      r.duration,
+      r.createdAt,
+      r.aiReport?.detectedObjects ?? '-',
+      r.aiReport?.obstacles ?? '-',
+      r.aiReport?.pathDeviation ?? '-'
+    ])
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(escapeCsvCell).join(','))
+      .join('\r\n')
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `任务记录_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
     
     ElMessage.success('导出成功')
   } catch (error) {
@@ -372,6 +395,10 @@ function exportToExcel() {
     exporting.value = false
   }
 }
+
+watch([searchKeyword, filterStatus, filterType, dateRange, pageSize], () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>

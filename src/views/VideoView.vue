@@ -28,7 +28,7 @@
       
       <div class="video-wrapper" ref="videoWrapperRef">
         <!-- 模拟视频画面 -->
-        <div class="simulated-video" ref="simulatedVideoRef" @click="onVideoClick" @mousedown="startSelection" @mousemove="updateSelection" @mouseup="endSelection">
+        <div class="simulated-video" ref="simulatedVideoRef" @mousedown="startSelection" @mousemove="updateSelection" @mouseup="endSelection">
           <!-- 模拟航拍背景 -->
           <div class="video-background" ref="videoBackgroundRef" :style="{ transform: `translate(${videoOffset.x}px, ${videoOffset.y}px)` }">
             <div class="grid-overlay"></div>
@@ -232,6 +232,23 @@
         </div>
         <el-empty v-else description="暂无截图" :image-size="40" />
       </div>
+
+      <!-- 录制元数据 -->
+      <div class="dashboard-card recordings">
+        <div class="card-header">
+          <span class="card-title">
+            <el-icon><VideoCamera /></el-icon>
+            录制记录
+          </span>
+        </div>
+        <div class="recording-list" v-if="recordedSegments.length > 0">
+          <div class="recording-item" v-for="segment in recordedSegments" :key="segment.id">
+            <span>{{ segment.startTime }}–{{ segment.endTime }}</span>
+            <strong>{{ segment.duration }}</strong>
+          </div>
+        </div>
+        <el-empty v-else description="暂无录制记录" :image-size="40" />
+      </div>
     </div>
 
     <!-- 截图预览对话框 -->
@@ -256,7 +273,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useDroneStore } from '../stores/drone'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
@@ -314,9 +331,8 @@ const selectionBox = reactive({
 const previewDialogVisible = ref(false)
 const previewingShot = ref(null)
 
-const currentTime = computed(() => {
-  return new Date().toLocaleTimeString()
-})
+const currentTime = ref(new Date().toLocaleTimeString())
+let clockTimer = null
 
 function togglePlay() {
   isPlaying.value = !isPlaying.value
@@ -471,10 +487,6 @@ function removeMark(id) {
   droneStore.removeVideoAiMark(id)
 }
 
-function onVideoClick(event) {
-  if (!aiModeEnabled.value) return
-}
-
 function startSelection(event) {
   if (!aiModeEnabled.value) return
   
@@ -502,7 +514,7 @@ function updateSelection(event) {
   selectionBox.height = Math.abs(currentY - selectionStart.y)
 }
 
-function endSelection(event) {
+function endSelection() {
   if (!isSelecting.value) return
   isSelecting.value = false
   
@@ -697,6 +709,9 @@ function stopSceneAnimation() {
 onMounted(() => {
   startVideoFlow()
   startSceneAnimation()
+  clockTimer = setInterval(() => {
+    currentTime.value = new Date().toLocaleTimeString()
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -706,6 +721,7 @@ onUnmounted(() => {
   stopAutoDetect()
   stopVideoFlow()
   stopSceneAnimation()
+  if (clockTimer) clearInterval(clockTimer)
 })
 </script>
 
@@ -1277,6 +1293,27 @@ onUnmounted(() => {
   color: var(--text-secondary);
   text-align: center;
   margin-top: 4px;
+}
+
+.recording-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recording-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-dark);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.recording-item strong {
+  color: var(--text-primary);
 }
 
 /* 预览对话框 */

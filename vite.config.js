@@ -2,9 +2,10 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+  base: './',
   plugins: [vue()],
   build: {
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -16,10 +17,6 @@ export default defineConfig({
 
           if (id.includes('echarts') || id.includes('vue-echarts') || id.includes('zrender')) {
             return 'vendor-charts'
-          }
-
-          if (id.includes('xlsx')) {
-            return 'vendor-xlsx'
           }
 
           if (id.includes('vue') || id.includes('pinia')) {

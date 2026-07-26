@@ -1,14 +1,16 @@
 {
-  "name": "drone-control-system",
+  "name": "vue-drone-mission-dashboard",
   "version": "1.0.0",
   "private": true,
-  "description": "AI-assisted drone monitoring and mission control dashboard built with Vue 3 and Vite.",
+  "description": "Vue 3 simulation dashboard for drone monitoring, waypoint planning, AI workflow demos, and mission records.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "npm run build"
+    "lint": "eslint .",
+    "check": "npm run lint && npm run build",
+    "audit": "npm audit --omit=dev --audit-level=high"
   },
   "keywords": [
     "vue",
@@ -16,25 +18,35 @@
     "drone",
     "dashboard",
     "monitoring",
-    "mission-planning"
+    "mission-planning",
+    "simulation"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dongtingshuo/vue-drone-mission-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dongtingshuo/vue-drone-mission-dashboard/issues"
+  },
+  "homepage": "https://github.com/dongtingshuo/vue-drone-mission-dashboard#readme",
   "engines": {
     "node": ">=20.19.0",
     "npm": ">=10.0.0"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
-    "axios": "^1.13.2",
-    "echarts": "^6.0.0",
+    "echarts": "^6.1.0",
     "element-plus": "^2.13.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.24",
-    "vue-echarts": "^8.0.1",
-    "vue-router": "^4.6.4",
-    "xlsx": "^0.18.5"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitejs/plugin-vue": "^6.0.1",
+    "eslint": "^10.8.0",
+    "eslint-plugin-vue": "^10.10.0",
+    "globals": "^17.7.0",
     "vite": "^7.2.4"
   }
 }

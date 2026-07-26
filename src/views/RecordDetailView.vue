@@ -75,7 +75,7 @@
             
             <div class="report-chart" ref="reportChartRef"></div>
             
-            <div class="detection-list">
+            <div class="detection-list" v-if="detectionResults.length">
               <h4>检测结果明细</h4>
               <div class="detection-item" v-for="item in detectionResults" :key="item.id">
                 <div class="detection-icon" :class="item.type">
@@ -91,6 +91,7 @@
                 <span class="detection-confidence">{{ item.confidence }}%</span>
               </div>
             </div>
+            <el-empty v-else description="该记录未保存逐目标明细" :image-size="60" />
           </div>
           <el-empty v-else description="该任务暂无AI分析报告" :image-size="80" />
         </div>
@@ -211,12 +212,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDroneStore } from '../stores/drone'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import * as echarts from 'echarts'
+import echarts from '../charts/echarts'
 
 const route = useRoute()
 const router = useRouter()
@@ -231,12 +232,7 @@ const record = computed(() => {
   return missionRecords.value.find(r => r.id === id)
 })
 
-const detectionResults = ref([
-  { id: 1, type: 'building', name: '厂房建筑', time: '09:32:15', confidence: 94 },
-  { id: 2, type: 'vehicle', name: '运输车辆', time: '09:35:22', confidence: 87 },
-  { id: 3, type: 'person', name: '工作人员', time: '09:38:45', confidence: 82 },
-  { id: 4, type: 'obstacle', name: '临时障碍', time: '09:41:10', confidence: 91 }
-])
+const detectionResults = computed(() => record.value?.aiReport?.detections || [])
 
 const isPlaying = ref(false)
 const playbackSpeed = ref(1)
@@ -245,7 +241,27 @@ const currentPointIndex = ref(0)
 let playbackTimer = null
 
 const trajectoryPoints = computed(() => {
+  const waypoints = record.value?.waypointData
+  if (Array.isArray(waypoints) && waypoints.length > 0) {
+    if (waypoints.length === 1) return [{ x: 250, y: 200 }]
+
+    const latitudes = waypoints.map(point => Number(point.lat))
+    const longitudes = waypoints.map(point => Number(point.lng))
+    const minLat = Math.min(...latitudes)
+    const maxLat = Math.max(...latitudes)
+    const minLng = Math.min(...longitudes)
+    const maxLng = Math.max(...longitudes)
+    const latRange = maxLat - minLat || 1
+    const lngRange = maxLng - minLng || 1
+
+    return waypoints.map(point => ({
+      x: 50 + ((Number(point.lng) - minLng) / lngRange) * 400,
+      y: 350 - ((Number(point.lat) - minLat) / latRange) * 300
+    }))
+  }
+
   const count = record.value?.waypoints || 5
+  if (count <= 1) return [{ x: 250, y: 200 }]
   const points = []
   for (let i = 0; i < count; i++) {
     points.push({
@@ -371,6 +387,7 @@ function reExecuteMission() {
       waypoints: record.value.waypoints,
       distance: record.value.distance,
       duration: record.value.duration,
+      waypointData: record.value.waypointData,
       isReExecution: true,
       originalId: record.value.id
     })
@@ -380,13 +397,30 @@ function reExecuteMission() {
 }
 
 function exportReport() {
-  ElMessage.success('报告导出成功')
+  if (!record.value) return
+
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    dataSource: 'frontend-simulation',
+    mission: record.value
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json;charset=utf-8'
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${record.value.missionId || `mission-${record.value.id}`}-report.json`
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('报告已导出为JSON')
 }
 
 function deleteRecord() {
   ElMessageBox.confirm('确定要删除此任务记录吗？', '警告', {
     type: 'warning'
   }).then(() => {
+    droneStore.deleteMissionRecord(record.value.id)
     ElMessage.success('删除成功')
     router.push('/records')
   }).catch(() => {})
@@ -420,14 +454,36 @@ function initChart() {
           fontWeight: 'bold'
         }
       },
-      data: [
-        { value: 5, name: '建筑物', itemStyle: { color: '#67c23a' } },
-        { value: 3, name: '车辆', itemStyle: { color: '#e6a23c' } },
-        { value: 2, name: '人员', itemStyle: { color: '#409eff' } },
-        { value: 2, name: '障碍物', itemStyle: { color: '#f56c6c' } }
-      ]
+      data: chartData()
     }]
   })
+}
+
+function chartData() {
+  if (detectionResults.value.length) {
+    const labels = {
+      building: ['建筑物', '#67c23a'],
+      vehicle: ['车辆', '#e6a23c'],
+      person: ['人员', '#409eff'],
+      obstacle: ['障碍物', '#f56c6c']
+    }
+    const counts = detectionResults.value.reduce((result, item) => {
+      result[item.type] = (result[item.type] || 0) + 1
+      return result
+    }, {})
+    return Object.entries(counts).map(([type, value]) => ({
+      value,
+      name: labels[type]?.[0] || type,
+      itemStyle: { color: labels[type]?.[1] || '#909399' }
+    }))
+  }
+
+  const obstacles = Number(record.value?.aiReport?.obstacles || 0)
+  const total = Number(record.value?.aiReport?.detectedObjects || 0)
+  return [
+    { value: Math.max(0, total - obstacles), name: '其他目标', itemStyle: { color: '#409eff' } },
+    { value: obstacles, name: '障碍物', itemStyle: { color: '#f56c6c' } }
+  ].filter(item => item.value > 0)
 }
 
 function handleResize() {

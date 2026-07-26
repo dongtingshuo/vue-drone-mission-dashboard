@@ -170,7 +170,7 @@ export const useDroneStore = defineStore('drone', () => {
 
   function updateDroneStatus(data) {
     Object.assign(droneStatus.value, data)
-    if (data.latitude && data.longitude) {
+    if (data.latitude != null && data.longitude != null) {
       trajectoryHistory.value.push({
         lat: data.latitude,
         lng: data.longitude,

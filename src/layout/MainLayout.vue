@@ -4,7 +4,8 @@
     <aside class="sidebar">
       <div class="logo">
         <el-icon :size="32"><Position /></el-icon>
-        <span class="logo-text">无人机控制系统</span>
+        <span class="logo-text">无人机任务看板</span>
+        <span class="simulation-badge">前端模拟</span>
       </div>
       
       <el-menu
@@ -12,19 +13,19 @@
         router
         class="sidebar-menu"
       >
-        <el-menu-item index="/monitor">
+        <el-menu-item index="/monitor" aria-label="实时监控" title="实时监控">
           <el-icon><Monitor /></el-icon>
           <span>实时监控</span>
         </el-menu-item>
-        <el-menu-item index="/mission">
+        <el-menu-item index="/mission" aria-label="AI任务控制" title="AI任务控制">
           <el-icon><Position /></el-icon>
           <span>AI任务控制</span>
         </el-menu-item>
-        <el-menu-item index="/video">
+        <el-menu-item index="/video" aria-label="航拍监控" title="航拍监控">
           <el-icon><VideoCamera /></el-icon>
           <span>航拍监控</span>
         </el-menu-item>
-        <el-menu-item index="/records">
+        <el-menu-item index="/records" aria-label="任务记录" title="任务记录">
           <el-icon><Document /></el-icon>
           <span>任务记录</span>
         </el-menu-item>
@@ -35,7 +36,7 @@
         <div class="status-item">
           <span class="status-indicator">
             <span :class="['status-dot', wsConnected ? 'online' : 'offline']"></span>
-            {{ wsConnected ? '已连接' : '未连接' }}
+            {{ wsConnected ? '模拟已连接' : '模拟未连接' }}
           </span>
         </div>
         <div class="drone-id" v-if="wsConnected">
@@ -71,7 +72,7 @@
             @click="toggleConnection"
             :loading="connecting"
           >
-            {{ wsConnected ? '断开连接' : '连接无人机' }}
+            {{ wsConnected ? '断开模拟' : '连接模拟无人机' }}
           </el-button>
         </div>
       </header>
@@ -96,12 +97,12 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const droneStore = useDroneStore()
-const { droneStatus, wsConnected, batteryStatus } = storeToRefs(droneStore)
+const { droneStatus, wsConnected } = storeToRefs(droneStore)
 
 const connecting = ref(false)
 let simulationInterval = null
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => route.path.startsWith('/records') ? '/records' : route.path)
 const currentRoute = computed(() => route)
 
 const batteryClass = computed(() => {
@@ -244,6 +245,7 @@ onUnmounted(() => {
 
 .main-content {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -376,6 +378,10 @@ onUnmounted(() => {
   }
   
   .logo-text {
+    display: none;
+  }
+
+  .simulation-badge {
     display: none;
   }
   
